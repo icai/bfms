@@ -12,7 +12,7 @@ npm install -d
 npm install -d --registry=https://registry.npm.taobao.org
 
 
-# serve with hot reload at localhost:8080
+# serve with hot reload at localhost:3000
 npm start (npm run start)
 
 
