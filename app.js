@@ -5,9 +5,13 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+
 var twig = require('twig');
+var twigConfig = require('./config/twig');
 
-
+twig.extend(function(Twig){
+	twigConfig(Twig);
+})
 
 
 var all = require('./routes/all');
@@ -22,7 +26,6 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
-
 twig.cache(false);
 // use .html suffix as twig engine template file suffix
 app.engine('html', twig.renderFile);
@@ -39,10 +42,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(require('express-dev-autoreload')({}));
+
 // app.use('/', index);
 // app.use('/users', users);
 
-app.use('*', all);
+app.get('*', all);
 // catch 404 and forward to error handler
 app.use(function(err, req, res, next) {
   var err = new Error('Not Found');

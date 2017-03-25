@@ -1,6 +1,42 @@
 {% extends 'layout.html' %}
 
+{% block style %}
+  <link rel="stylesheet" type="text/css" href="/stylesheets/style2.css">
+{% endblock %}
+
 {% block body %}
   <h1>{{title}}</h1>
   <p>Welcome to {{title}}</p>
+  <p>ssss</p>
+
+{% raw %}
+	<script type="text/template" id="template">
+		{{=it.title}}
+		{{?it.name}}
+			 doT template test
+		{{??}}
+			doT template test2
+		{?}
+	</script>
+{% endraw %}
+<script type="text/template" id="template">
+
+		This is no raw
+		
+		{{=it.title}}
+		{{?it.name}}
+			 doT template test
+		{{??}}
+			doT template test2
+		{?}
+</script>
+
 {% endblock %}
+
+
+
+
+
+
+
+
