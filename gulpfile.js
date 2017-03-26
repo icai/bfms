@@ -11,7 +11,7 @@ var overrideCssUrl = require('gulp-rev-css-url');
 var sequence = require('gulp-sequence')
 
 /**
- * options 
+ * options
  * @type {Object}
  */
 var opt = {
@@ -21,16 +21,18 @@ var opt = {
 }
 
 
+// https://github.com/sindresorhus/gulp-rev
+
+
 gulp.task('clean', function() {
     return gulp.src([opt.tmp, opt.build], { read: false })
         .pipe(clean());
 })
 
-gulp.task('cleantmp', function() {
+gulp.task('clean:tmp', function() {
     return gulp.src([opt.tmp], { read: false })
         .pipe(clean());
 })
-
 
 gulp.task('compile', function() {
     'use strict';
@@ -49,8 +51,7 @@ gulp.task('compile', function() {
         .pipe(gulp.dest(opt.tmp));
 });
 
-
-gulp.task('assets', function(){
+gulp.task('assets', function() {
     return gulp.src(opt.assets)
         .pipe(gulp.dest(opt.tmp))
 })
@@ -58,56 +59,77 @@ gulp.task('assets', function(){
 
 
 gulp.task("rev", function() {
-  var jsFilter = filter(opt.tmp + "/**/*.js", { restore: true });
-  var cssFilter = filter(opt.tmp +"/**/*.css", { restore: true });
-  var htmlFilter = filter([opt.tmp + '/**/*', '!'+ opt.tmp +'/**/*.html'], { restore: true });
-  return gulp.src( opt.tmp +'/**/*.html')
-    .pipe(useref({
-        // base: opt.tmp,
-        searchPath: opt.tmp,
-    }))      // Concatenate with gulp-useref
-    .pipe(jsFilter)
-    .pipe(uglify())             // Minify any javascript sources
-    .pipe(jsFilter.restore)
-    .pipe(cssFilter)
-    .pipe(csso())               // Minify any CSS sources
-    .pipe(overrideCssUrl())
-    .pipe(cssFilter.restore)
-    .pipe(htmlFilter)
-    .pipe(rev())                // Rename the concatenated files (but not index.html)
-    .pipe(htmlFilter.restore)
-    .pipe(revReplace())         // Substitute in new filenames
-    .pipe(htmlmin({ collapseWhitespace: true }))
-    .pipe(gulp.dest(opt.tmp))
-    .pipe(rev.manifest())
-    .pipe(gulp.dest(opt.tmp));
+    var jsFilter = filter(opt.tmp + "/**/*.js", { restore: true });
+    var cssFilter = filter(opt.tmp + "/**/*.css", { restore: true });
+    var htmlFilter = filter([opt.tmp + '/**/*', '!' + opt.tmp + '/**/*.html'], { restore: true });
+    return gulp.src(opt.tmp + '/**/*.html')
+        .pipe(useref({
+            searchPath: opt.tmp,
+        })) // Concatenate with gulp-useref
+        .pipe(jsFilter)
+        .pipe(uglify()) // Minify any javascript sources
+        .pipe(jsFilter.restore)
+        .pipe(cssFilter)
+        .pipe(csso()) // Minify any CSS sources
+        .pipe(cssFilter.restore)
+        .pipe(htmlFilter)
+        .pipe(rev())
+        .pipe(htmlFilter.restore)
+        .pipe(revReplace()) // Substitute in new filenames
+        .pipe(htmlmin({ collapseWhitespace: true }))
+        .pipe(gulp.dest(opt.tmp))
+        .pipe(rev.manifest())
+        .pipe(gulp.dest(opt.tmp));
 });
 
 
-gulp.task("revision", function(){
-  return gulp.src([ opt.tmp+"/**/*.css", opt.tmp+ "/**/*.js"])
-    .pipe(rev())
-    .pipe(gulp.dest(opt.build))
-    .pipe(rev.manifest())
-    .pipe(gulp.dest(opt.build))
+gulp.task("revision", function() {
+    return gulp.src([opt.tmp + "/**/*", '!' + opt.tmp + '/**/*.html'])
+        .pipe(rev())
+        .pipe(overrideCssUrl())
+        .pipe(gulp.dest(opt.build))
+        .pipe(rev.manifest())
+        .pipe(gulp.dest(opt.build))
 })
 
-gulp.task("revreplace", ["revision"], function(){
-  var manifest = gulp.src(opt.build + "/rev-manifest.json");
-  return gulp.src(opt.tmp + "/**/*.html")
-    .pipe(revReplace({manifest: manifest}))
-    .pipe(gulp.dest(opt.build));
+gulp.task("revreplace", ["revision"], function() {
+    var manifest = gulp.src(opt.build + "/rev-manifest.json");
+    return gulp.src(opt.tmp + "/**/*.html")
+        .pipe(revReplace({ manifest: manifest }))
+        .pipe(gulp.dest(opt.build));
 });
 
 
-gulp.task('build', sequence('clean', 'compile', 'assets', 'rev', 'revreplace', 'cleantmp'))
+gulp.task('build', sequence('clean', 'compile', 'assets', 'rev', 'revreplace'))
 
 
 
-// .pipe(overrideCssUrl())
-//     .pipe(gulp.dest('./build'))
-//     .pipe(rev.manifest())
+var serve = function() {
+    var express = require('express');
+    var app = express();
+    var fs = require('fs');
+    var publicdir = opt.build;
+    app.use(function(req, res, next) {
+        if (req.path.indexOf('.') === -1) {
+            var file = publicdir + req.path + '.html';
+            fs.exists(file, function(exists) {
+                if (exists) {
+                    var index = req.url.indexOf(req.path) + req.path.length
+                    req.url = req.url.slice(0, index) + '.html' + req.url.slice(index);
+                }
+                next();
+            });
+        } else {
+            next();
+        }
+    });
+    app.use(express.static(publicdir));
+    app.listen(3000, function() {
+        console.log('build serve listening on port 3000!')
+    })
+}
 
-// https://github.com/sindresorhus/gulp-rev
 
-// gulp.task('default', ['compile']);
+gulp.task('serve', ['build'], function() {
+    serve();
+})

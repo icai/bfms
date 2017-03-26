@@ -5,3 +5,11 @@ a{
 body{
 	background: #fe0;
 }
+
+.google{
+	width: 272px;
+	height: 92px;
+	background: url(/images/googlelogo.png);
+	background-size: 100%;
+	margin: 0 auto;
+}

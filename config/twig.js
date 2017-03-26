@@ -1,11 +1,9 @@
-var token = function(Twig){
-	Twig.token.definitions = [
-        {
+var token = function(Twig) {
+    Twig.token.definitions = [{
             type: Twig.token.type.raw,
             open: '{% raw %}',
             close: '{% endraw %}'
-        },
-        {
+        }, {
             type: Twig.token.type.raw,
             open: '{% verbatim %}',
             close: '{% endverbatim %}'
@@ -17,28 +15,23 @@ var token = function(Twig){
             type: Twig.token.type.output_whitespace_pre,
             open: '{{-',
             close: '}}'
-        },
-        {
+        }, {
             type: Twig.token.type.output_whitespace_post,
             open: '{{',
             close: '-}}'
-        },
-        {
+        }, {
             type: Twig.token.type.output_whitespace_both,
             open: '{{-',
             close: '-}}'
-        },
-        {
+        }, {
             type: Twig.token.type.logic_whitespace_pre,
             open: '{%-',
             close: '%}'
-        },
-        {
+        }, {
             type: Twig.token.type.logic_whitespace_post,
             open: '{%',
             close: '-%}'
-        },
-        {
+        }, {
             type: Twig.token.type.logic_whitespace_both,
             open: '{%-',
             close: '-%}'
@@ -48,10 +41,10 @@ var token = function(Twig){
         // These typically take the form `{{ expression }}`.
         {
             type: Twig.token.type.output,
-            open: '<%=' ,
+            open: '<%=',
             close: '%>'
-            // open: '{{',
-            // close: '}}'
+                // open: '{{',
+                // close: '}}'
         },
         // *Logic type tokens*
         //
@@ -70,5 +63,5 @@ var token = function(Twig){
             close: '#}'
         }
     ];
-}
+};
 module.exports = token;
