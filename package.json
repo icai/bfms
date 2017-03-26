@@ -4,7 +4,6 @@
   "description": "A Solution for Front End Multiple Pages Architecture separating front end and back end",
   "author": "Terry Cai",
   "license": "MIT",
-  "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
@@ -32,5 +31,19 @@
     "gulp-uglify": "^2.1.2",
     "gulp-useref": "^3.1.2",
     "gulp-zip": "^4.0.0"
-  }
+  },
+  "main": "./bin/www",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/icai/bfms.git"
+  },
+  "keywords": [
+    "static",
+    "sever",
+    "development"
+  ],
+  "bugs": {
+    "url": "https://github.com/icai/bfms/issues"
+  },
+  "homepage": "https://github.com/icai/bfms#readme"
 }
