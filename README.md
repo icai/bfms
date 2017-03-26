@@ -16,15 +16,15 @@ npm install -d --registry=https://registry.npm.taobao.org
 npm start (npm run start)
 
 
+# build project to release
+gulp build
+
+
+# test repleasing files
+
+gulp serve
+
 ```
-
-## Note
-
-
-DEVELOPING
-
-Current version is beta version
-
 
 
 

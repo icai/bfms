@@ -8,7 +8,8 @@ var filter = require('gulp-filter');
 var uglify = require('gulp-uglify');
 var csso = require('gulp-csso');
 var overrideCssUrl = require('gulp-rev-css-url');
-var sequence = require('gulp-sequence')
+var sequence = require('gulp-sequence');
+var zip = require('gulp-zip');
 
 /**
  * options
@@ -21,8 +22,57 @@ var opt = {
 }
 
 
-// https://github.com/sindresorhus/gulp-rev
+String.prototype.repeat = function(n) {
+    var n = n || 1;
+    return Array(n + 1).join(this);
+}
 
+
+var getDate = function() {
+    var date = new Date();
+    var arr = [date.getMonth() + 1, date.getDate(), date.getHours(), date.getMinutes(), date.getMilliseconds()];
+    for (var i = 0, len = arr.length; i < len; i++) {
+        var sl = ("" + arr[i]).length;
+        if(i == len - 1){
+            if(sl < 3){
+                arr[i] = "0".repeat( 3 - sl) + arr[i];
+            }
+        } else {
+            if(sl == 1){
+                arr[i] = "0" + arr[i];
+            }
+        }
+    }
+    return  "" + date.getFullYear() + arr.join('');
+}
+
+var serve = function() {
+    var express = require('express');
+    var app = express();
+    var fs = require('fs');
+    var publicdir = opt.build;
+    app.use(function(req, res, next) {
+        if (req.path.indexOf('.') === -1) {
+            var file = publicdir + req.path + '.html';
+            fs.exists(file, function(exists) {
+                if (exists) {
+                    var index = req.url.indexOf(req.path) + req.path.length
+                    req.url = req.url.slice(0, index) + '.html' + req.url.slice(index);
+                }
+                next();
+            });
+        } else {
+            next();
+        }
+    });
+    app.use(express.static(publicdir));
+    app.listen(3000, function() {
+        console.log('build serve listening on port 3000!')
+    })
+}
+
+
+// https://github.com/sindresorhus/gulp-rev
 
 gulp.task('clean', function() {
     return gulp.src([opt.tmp, opt.build], { read: false })
@@ -100,36 +150,29 @@ gulp.task("revreplace", ["revision"], function() {
 });
 
 
-gulp.task('build', sequence('clean', 'compile', 'assets', 'rev', 'revreplace'))
+gulp.task('build', sequence('clean', 'compile', 'assets', 'rev', 'revreplace', 'clean:tmp'))
 
 
 
-var serve = function() {
-    var express = require('express');
-    var app = express();
-    var fs = require('fs');
-    var publicdir = opt.build;
-    app.use(function(req, res, next) {
-        if (req.path.indexOf('.') === -1) {
-            var file = publicdir + req.path + '.html';
-            fs.exists(file, function(exists) {
-                if (exists) {
-                    var index = req.url.indexOf(req.path) + req.path.length
-                    req.url = req.url.slice(0, index) + '.html' + req.url.slice(index);
-                }
-                next();
-            });
-        } else {
-            next();
-        }
-    });
-    app.use(express.static(publicdir));
-    app.listen(3000, function() {
-        console.log('build serve listening on port 3000!')
-    })
-}
-
-
+/**
+ * test build files
+ * @param  {[type]} ) {               serve();} [description]
+ * @return {[type]}   [description]
+ */
 gulp.task('serve', ['build'], function() {
     serve();
+})
+
+
+
+/**
+ * package build files
+ * @param  {[type]} ){} [description]
+ * @return {[type]}       [description]
+ */
+gulp.task('zip', ['build'], function(){
+
+    return gulp.src(opt.build +'/**/*')
+        .pipe(zip('package-'+ getDate() +'.zip'))
+        .pipe(gulp.dest('dist'))
 })
