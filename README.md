@@ -20,7 +20,7 @@ npm start (npm run start)
 gulp build
 
 
-# test repleasing files
+# test releasing files
 
 gulp serve
 
